@@ -1,16 +1,54 @@
-# React + Vite
+# 🗂️ Project Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![React](https://img.shields.io/badge/React-18.2-blue)
+![Vite](https://img.shields.io/badge/Vite-4.0-purple)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/status-active-success)
 
-Currently, two official plugins are available:
+**Project Planner** - это современное веб-приложение для управления задачами с использованием Kanban доски. Приложение позволяет эффективно организовывать рабочий процесс, отслеживать прогресс и управлять приоритетами задач.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## React Compiler
+## ✨ Особенности
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 📋 Управление задачами
+- **4 колонки Kanban**: Очередь, В работе, На проверке, Готово
+- **Приоритеты**: Низкий, Средний, Высокий (цветовая индикация)
+- **Drag & Drop**: Перетаскивание задач между колонками
+- **Контекстное меню**: Правый клик для быстрых действий
 
-## Expanding the ESLint configuration
+### 🔧 Функциональность
+- 💾 **Автосохранение**: Все данные сохраняются в браузере
+- 📥📤 **Импорт/экспорт**: Сохранение и загрузка задач в JSON
+- ✂️📋 **Буфер обмена**: Вырезать/копировать/вставить задачи
+- 🔍 **Быстрый поиск**: По названию и описанию задач
+- 📊 **Статистика**: Отслеживание прогресса по задачам
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🎨 Интерфейс
+- 📱 **Адаптивный дизайн**: Работает на всех устройствах
+- 🎯 **Интуитивный UI**: Простой и понятный интерфейс
+- 🌙 **Темная тема**: Комфортная работа в любое время суток
+- ⚡ **Быстрая загрузка**: Оптимизированная производительность
+
+## 🚀 Быстрый старт
+
+### Требования
+- Node.js 16+ 
+- npm 8+ или yarn
+
+### Установка и запуск
+
+```bash
+# Клонируйте репозиторий
+git clone https://github.com/yurbas-art/project-planner.git
+
+# Перейдите в папку проекта
+cd project-planner
+
+# Установите зависимости
+npm install
+
+# Запустите в режиме разработки
+npm run dev
+
+# Откройте в браузере
+# http://localhost:3000
