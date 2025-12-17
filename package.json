@@ -1,0 +1,34 @@
+{
+  "name": "project-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Project Planner - Kanban доска для управления задачами",
+  "author": "Your Name",
+  "license": "MIT",
+  "homepage": ".",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^4.0.0"
+  },
+  "keywords": [
+    "project-planner",
+    "kanban",
+    "task-manager",
+    "project-management"
+  ]
+}

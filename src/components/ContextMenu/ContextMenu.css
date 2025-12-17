@@ -1,0 +1,53 @@
+.context-menu {
+    position: fixed;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    min-width: 160px;
+    padding: 4px;
+    animation: contextMenuAppear 0.2s ease;
+  }
+  
+  @keyframes contextMenuAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .context-menu-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #000;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .context-menu-item:hover:not(:disabled) {
+    background-color: #f8f9fa;
+  }
+  
+  .context-menu-item:disabled {
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .context-menu-item.danger {
+    color: #dc3545;
+  }
+  
+  .context-menu-item.danger:hover:not(:disabled) {
+    background-color: #f8d7da;
+  }

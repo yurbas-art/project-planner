@@ -1,0 +1,64 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  height: 60px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 100;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.project-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+  margin-right: 16px;
+}
+
+.header-center {
+  font-size: 18px;
+  font-weight: 500;
+  color: #000;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.logo {
+  font-size: 24px;
+}
+
+.create-btn,
+.settings-btn {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  position: relative;
+  z-index: 101;
+}
+
+.create-btn:hover,
+.settings-btn:hover {
+  background-color: #0056b3;
+}
+
+.username {
+  font-weight: 500;
+  color: #000;
+}
