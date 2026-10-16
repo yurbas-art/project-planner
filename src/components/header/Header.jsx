@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./Header.css";
 
-export default function Header({ onOpenSettings, onCreateTask }) {
+export default function Header({ onOpenSettings, onCreateTask, user, onLogout }) {
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -35,7 +35,6 @@ export default function Header({ onOpenSettings, onCreateTask }) {
   return (
     <header className="header">
       <div className="header-left">
-        <span className="logo">📋</span>
         <h1 className="project-title">Project Planner</h1>
         <button 
           className="create-btn" 
@@ -52,7 +51,8 @@ export default function Header({ onOpenSettings, onCreateTask }) {
         >
           ⚙
         </button>
-        <span className="username">Username</span>
+        <span className="username">{user?.name || user?.email}</span>
+        <button className="logout-btn" onClick={onLogout}>Выйти</button>
       </div>
     </header>
   );

@@ -1,3 +1,34 @@
+# Project Planner
+
+## Авторизация и MariaDB
+
+Backend запускается отдельно от Vite и использует MariaDB для хранения учетных записей.
+
+1. Убедитесь, что MariaDB запущена.
+2. Выполните SQL-схему:
+
+```bash
+mariadb -u root -p < server/schema.sql
+```
+
+Если база уже была создана ранее, повторно выполните эту команду: она добавит таблицу `tasks` без удаления пользователей.
+
+3. Проверьте параметры подключения в `server/.env`.
+4. Запустите frontend и backend:
+
+```bash
+npm run dev:full
+```
+
+Или в двух терминалах:
+
+```bash
+npm run server
+npm run dev
+```
+
+Backend доступен на `http://localhost:3001`, frontend — на `http://localhost:5173`.
+MariaDB для этого проекта должна быть настроена на `127.0.0.1:3307`, чтобы не пересекаться с Docker-контейнером `DB-labs`, который использует порт `3306`.
 # 🗂️ Project Planner
 
 ![React](https://img.shields.io/badge/React-18.2-blue)

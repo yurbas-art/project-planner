@@ -32,3 +32,10 @@ button:disabled {
 input, textarea, select {
   font-family: inherit;
 }
+
+.auth-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+}
