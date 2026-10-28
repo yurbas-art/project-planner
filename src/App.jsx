@@ -8,8 +8,6 @@ import AuthScreen from "./components/auth/AuthScreen";
 import { authApi, taskApi } from "./api/api";
 
 export default function App() {
-  console.log("=== PROJECT PLANNER APP RENDER ===");
-  
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [taskViewOpen, setTaskViewOpen] = useState(false);
@@ -19,6 +17,7 @@ export default function App() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [operationError, setOperationError] = useState("");
 
   useEffect(() => {
     authApi.me()
@@ -32,15 +31,19 @@ export default function App() {
     setIsLoaded(false);
     taskApi.list()
       .then(({ tasks: loadedTasks }) => setTasks(loadedTasks))
-      .catch((error) => console.error("Ошибка при загрузке задач:", error))
+      .catch((error) => setOperationError(error.message))
       .finally(() => setIsLoaded(true));
   }, [user]);
 
   const handleLogout = async () => {
-    await authApi.logout();
-    setUser(null);
-    setTasks([]);
-    setIsLoaded(false);
+    try {
+      await authApi.logout();
+      setUser(null);
+      setTasks([]);
+      setIsLoaded(false);
+    } catch (error) {
+      setOperationError(error.message);
+    }
   };
 
   if (authLoading) {
@@ -55,7 +58,6 @@ export default function App() {
   }
 
   const initializeWithDemoTasks = async () => {
-    console.log("Инициализация демо-задач");
     const demoTasks = [
       {
         id: Date.now(),
@@ -91,80 +93,87 @@ export default function App() {
       }
       setTasks(createdTasks);
     } catch (error) {
-      console.error("Ошибка при создании демо-задач:", error);
+      setOperationError(error.message);
     }
   };
 
   const addTask = async (task) => {
-    console.log("Добавляем задачу:", task.title);
-    const { task: createdTask } = await taskApi.create(task);
-    setTasks(prev => [...prev, createdTask]);
-    setTaskModalOpen(false);
+    try {
+      const { task: createdTask } = await taskApi.create(task);
+      setTasks(prev => [...prev, createdTask]);
+      setTaskModalOpen(false);
+    } catch (error) {
+      setOperationError(error.message);
+      throw error;
+    }
   };
 
   const updateTask = async (updatedTask) => {
-    console.log("Обновляем задачу:", updatedTask.id);
-    const { task: savedTask } = await taskApi.update(updatedTask.id, updatedTask);
-    setTasks(prev => prev.map(t => t.id === savedTask.id ? savedTask : t));
+    try {
+      const { task: savedTask } = await taskApi.update(updatedTask.id, updatedTask);
+      setTasks(prev => prev.map(t => t.id === savedTask.id ? savedTask : t));
+    } catch (error) {
+      setOperationError(error.message);
+      throw error;
+    }
   };
 
   const deleteTask = async (id) => {
-    console.log("Удаляем задачу:", id);
-    await taskApi.remove(id);
-    setTasks(prev => prev.filter(t => t.id !== id));
+    try {
+      await taskApi.remove(id);
+      setTasks(prev => prev.filter(t => t.id !== id));
+    } catch (error) {
+      setOperationError(error.message);
+    }
   };
 
   const moveTask = async (id, newStatus) => {
-    console.log("Перемещаем задачу:", id, "→", newStatus);
-    const { task: savedTask } = await taskApi.update(id, { status: newStatus });
-    setTasks(prev => prev.map(t => t.id === savedTask.id ? savedTask : t));
+    try {
+      const { task: savedTask } = await taskApi.update(id, { status: newStatus });
+      setTasks(prev => prev.map(t => t.id === savedTask.id ? savedTask : t));
+    } catch (error) {
+      setOperationError(error.message);
+    }
   };
 
   const openTaskView = (task) => {
-    console.log("Открываем просмотр задачи:", task.id);
     setSelectedTask(task);
     setTaskViewOpen(true);
   };
 
   const cutTask = (task) => {
-    console.log("Вырезаем задачу:", task.id);
     setClipboardTask(task);
     deleteTask(task.id);
   };
 
   const copyTask = (task) => {
-    console.log("Копируем задачу:", task.id);
     setClipboardTask(task);
   };
 
   const pasteTask = (column) => {
     if (clipboardTask) {
-      console.log("Вставляем задачу в колонку:", column);
       taskApi.create({ ...clipboardTask, status: column })
         .then(({ task: createdTask }) => setTasks(prev => [...prev, createdTask]))
-        .catch((error) => console.error("Ошибка при вставке задачи:", error));
+        .catch((error) => setOperationError(error.message));
       setClipboardTask(null);
     }
   };
 
   const clearAllTasks = () => {
-    console.log("Очищаем все задачи");
     if (window.confirm("Вы уверены, что хотите удалить ВСЕ задачи?")) {
       taskApi.removeAll()
         .then(() => setTasks([]))
-        .catch((error) => console.error("Ошибка при удалении задач:", error));
+        .catch((error) => setOperationError(error.message));
     }
   };
 
   const showDemoButton = tasks.length === 0 && isLoaded;
 
   const handleCreateTask = () => {
-    console.log("Создать задачу - кнопка нажата");
     setTaskModalOpen(true);
   };
 
   const handleOpenSettings = () => {
-    console.log("Настройки - кнопка нажата");
     setSettingsOpen(true);
   };
 
@@ -176,6 +185,13 @@ export default function App() {
         user={user}
         onLogout={handleLogout}
       />
+
+      {operationError && (
+        <div className="operation-error" role="alert">
+          <span>{operationError}</span>
+          <button type="button" onClick={() => setOperationError("")}>Закрыть</button>
+        </div>
+      )}
       
       {showDemoButton && (
         <div style={{

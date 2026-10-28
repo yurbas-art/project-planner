@@ -25,6 +25,8 @@ app.use(session({
 }));
 
 const publicUser = (user) => ({ id: user.id, name: user.name, email: user.email });
+const priorities = new Set(["низкий", "средний", "высокий"]);
+const statuses = new Set(["Очередь", "В работе", "На проверке", "Готово"]);
 const requireAuth = (req, res, next) => {
   if (!req.session.user) return res.status(401).json({ message: "Не авторизован" });
   next();
@@ -38,6 +40,14 @@ const toTask = (task) => ({
   status: task.status,
   createdAt: task.created_at,
 });
+
+const findTask = async (id, userId) => {
+  const [rows] = await pool.execute(
+    "SELECT id, title, description, priority, status, created_at FROM tasks WHERE id = ? AND user_id = ?",
+    [id, userId],
+  );
+  return rows[0];
+};
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
@@ -69,6 +79,7 @@ app.post("/api/auth/register", async (req, res) => {
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email?.trim() || !password) return res.status(400).json({ message: "Введите email и пароль" });
     const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email?.trim().toLowerCase()]);
     const user = rows[0];
     if (!user || !(await bcrypt.compare(password || "", user.password_hash))) {
@@ -112,15 +123,13 @@ app.post("/api/tasks", requireAuth, async (req, res) => {
   try {
     const { title, desc = "", priority = "низкий", status = "Очередь" } = req.body;
     if (!title?.trim()) return res.status(400).json({ message: "Название задачи обязательно" });
+    if (!priorities.has(priority)) return res.status(400).json({ message: "Недопустимый приоритет" });
+    if (!statuses.has(status)) return res.status(400).json({ message: "Недопустимый статус" });
     const [result] = await pool.execute(
       "INSERT INTO tasks (user_id, title, description, priority, status) VALUES (?, ?, ?, ?, ?)",
       [req.session.user.id, title.trim(), desc, priority, status],
     );
-    const [rows] = await pool.execute(
-      "SELECT id, title, description, priority, status, created_at FROM tasks WHERE id = ? AND user_id = ?",
-      [result.insertId, req.session.user.id],
-    );
-    res.status(201).json({ task: toTask(rows[0]) });
+    res.status(201).json({ task: toTask(await findTask(result.insertId, req.session.user.id)) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Не удалось создать задачу" });
@@ -130,16 +139,15 @@ app.post("/api/tasks", requireAuth, async (req, res) => {
 app.patch("/api/tasks/:id", requireAuth, async (req, res) => {
   try {
     const { title, desc, priority, status } = req.body;
+    if (title !== undefined && !title?.trim()) return res.status(400).json({ message: "Название задачи обязательно" });
+    if (priority !== undefined && !priorities.has(priority)) return res.status(400).json({ message: "Недопустимый приоритет" });
+    if (status !== undefined && !statuses.has(status)) return res.status(400).json({ message: "Недопустимый статус" });
     const [result] = await pool.execute(
       "UPDATE tasks SET title = COALESCE(?, title), description = COALESCE(?, description), priority = COALESCE(?, priority), status = COALESCE(?, status) WHERE id = ? AND user_id = ?",
       [title?.trim() || null, desc ?? null, priority ?? null, status ?? null, req.params.id, req.session.user.id],
     );
     if (!result.affectedRows) return res.status(404).json({ message: "Задача не найдена" });
-    const [rows] = await pool.execute(
-      "SELECT id, title, description, priority, status, created_at FROM tasks WHERE id = ? AND user_id = ?",
-      [req.params.id, req.session.user.id],
-    );
-    res.json({ task: toTask(rows[0]) });
+    res.json({ task: toTask(await findTask(req.params.id, req.session.user.id)) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Не удалось обновить задачу" });

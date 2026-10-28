@@ -3,8 +3,6 @@ import Modal from "./Modal";
 import "./modals.css";
 
 export default function TaskViewModal({ open, onClose, task, onUpdateTask }) {
-  console.log("TaskViewModal:", { open, task: task?.id });
-
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [priority, setPriority] = useState("низкий");
@@ -17,11 +15,13 @@ export default function TaskViewModal({ open, onClose, task, onUpdateTask }) {
     }
   }, [task]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("TaskViewModal: Обновление задачи", { id: task?.id, title, desc, priority });
-    onUpdateTask({ ...task, title, desc, priority });
-    onClose();
+    try {
+      await onUpdateTask({ ...task, title, desc, priority });
+      onClose();
+    } catch {
+    }
   };
 
   if (!open || !task) return null;

@@ -3,20 +3,19 @@ import Modal from "./Modal";
 import "./modals.css";
 
 export default function TaskModal({ open, onClose, onAddTask }) {
-  console.log("TaskModal:", { open });
-
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [priority, setPriority] = useState("низкий");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("TaskModal: Создание задачи", { title, desc, priority });
-    onAddTask({ title, desc, priority, status: "Очередь" });
-    setTitle("");
-    setDesc("");
-    setPriority("низкий");
-    onClose();
+    try {
+      await onAddTask({ title, desc, priority, status: "Очередь" });
+      setTitle("");
+      setDesc("");
+      setPriority("низкий");
+    } catch {
+    }
   };
 
   if (!open) return null;

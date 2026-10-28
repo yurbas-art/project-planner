@@ -8,42 +8,50 @@
 ![MariaDB](https://img.shields.io/badge/MariaDB-3307-003545?style=flat-square&logo=mariadb&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)
 
-Project Planner помогает вести задачи в четырех этапах: **Очередь**, **В работе**, **На проверке** и **Готово**. Учетные записи и задачи хранятся на сервере, поэтому доска не зависит от одного браузера или устройства.
+Project Planner - веб-приложение для управления задачами на Kanban-доске. Пользователь создает карточки, назначает им приоритет, редактирует содержимое и перемещает задачи между четырьмя этапами: **Очередь**, **В работе**, **На проверке** и **Готово**.
+
+Учетные записи и задачи хранятся в MariaDB. Frontend обращается к базе только через Express API, а доступ к задачам ограничен текущей пользовательской сессией.
 
 ## Возможности
 
-| Область | Что доступно |
-| --- | --- |
-| Авторизация | Регистрация, вход, проверка сессии и выход |
-| Kanban | Четыре статуса и перенос карточек Drag & Drop |
-| Задачи | Создание, редактирование, удаление и очистка доски |
-| Приоритеты | Низкий, средний и высокий |
-| Хранение | MariaDB с привязкой каждой задачи к пользователю |
-| Интерфейс | React-компоненты, модальные формы и контекстные действия |
+- регистрация, вход, проверка сессии и выход;
+- создание, редактирование и удаление задач;
+- очистка всех задач текущего пользователя;
+- Drag & Drop между Kanban-колонками;
+- приоритеты: низкий, средний и высокий;
+- серверное хранение задач с привязкой к пользователю;
+- модальные формы и контекстные действия для карточек.
 
 ## Архитектура
 
 ```mermaid
 flowchart LR
-	UI[React + Vite\nlocalhost:5173]
-	API[Express API\nlocalhost:3001]
-	DB[(MariaDB\n127.0.0.1:3307)]
-	UI -->|HTTP/JSON + cookie| API
-	API -->|mysql2| DB
+    UI[React + Vite\nlocalhost:5173]
+    API[Express API\nlocalhost:3001]
+    DB[(MariaDB\n127.0.0.1:3307)]
+    UI -->|HTTP/JSON + cookie| API
+    API -->|mysql2| DB
 ```
 
-Frontend не подключается к базе напрямую. Backend управляет сессиями, проверяет пользователя и выполняет операции с задачами только в его области данных.
+Приложение разделено на три уровня:
+
+1. **Frontend** отображает интерфейс и отправляет запросы.
+2. **Backend** управляет сессиями, проверяет пользователя и выполняет операции с задачами.
+3. **MariaDB** хранит пользователей и задачи.
 
 ## Технологии
 
-- **Frontend:** React 18, Vite, JavaScript/JSX, CSS.
-- **Drag & Drop:** `react-dnd` и `react-dnd-html5-backend`.
-- **Backend:** Node.js, Express 5, Fetch API.
-- **Database:** MariaDB, `mysql2` connection pool.
-- **Auth:** `express-session`, `bcryptjs`, HttpOnly cookie.
-- **Документация:** Markdown и Mermaid.
+| Уровень | Технологии |
+| --- | --- |
+| Интерфейс | React 18, JavaScript/JSX, CSS |
+| Сборка | Vite 8 |
+| Drag & Drop | `react-dnd`, `react-dnd-html5-backend` |
+| Сервер | Node.js, Express 5 |
+| База данных | MariaDB, `mysql2` |
+| Авторизация | `express-session`, `bcryptjs`, HttpOnly cookie |
+| Документация | Markdown, Mermaid |
 
-Подробное описание находится в [`docs/technical_description.md`](docs/technical_description.md), а список технологий - в [`docs/technological_stack.md`](docs/technological_stack.md).
+Подробности находятся в [`docs/technical_description.md`](docs/technical_description.md) и [`docs/technological_stack.md`](docs/technological_stack.md).
 
 ## Быстрый старт
 
@@ -51,11 +59,11 @@ Frontend не подключается к базе напрямую. Backend у�
 
 - Node.js и npm;
 - MariaDB;
-- доступ к локальному порту `3307`.
+- свободный локальный порт `3307`.
 
-Порт `3307` используется, чтобы не пересекаться с Docker-контейнером `DB-labs`, который занимает `3306`.
+Порт `3307` выбран, чтобы не пересекаться с Docker-контейнером `DB-labs`, который использует `3306`.
 
-### 1. Установка зависимостей
+### Установка
 
 ```bash
 git clone https://github.com/yurbas-art/project-planner.git
@@ -63,9 +71,13 @@ cd project-planner
 npm install --legacy-peer-deps
 ```
 
-### 2. Настройка окружения
+### Настройка окружения
 
-Создайте `server/.env` на основе `server/.env.example`:
+Скопируйте `server/.env.example` в `server/.env` и укажите параметры MariaDB:
+
+```bash
+cp server/.env.example server/.env
+```
 
 ```env
 PORT=3001
@@ -73,34 +85,32 @@ CLIENT_URL=http://localhost:5173
 DB_HOST=127.0.0.1
 DB_PORT=3307
 DB_NAME=project_planner_auth
-DB_USER=yurbas_2007
-DB_PASSWORD=your_password
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
 SESSION_SECRET=change-this-secret
 ```
 
-Файл `server/.env` не нужно добавлять в Git.
+`server/.env` содержит секреты и не должен добавляться в Git.
 
-### 3. Подготовка базы данных
+### Подготовка базы данных
 
-Убедитесь, что MariaDB запущена на `127.0.0.1:3307`, затем выполните схему:
+Убедитесь, что MariaDB запущена на `127.0.0.1:3307`, а пользователь приложения имеет права на базу `project_planner_auth`. Затем примените схему:
 
 ```bash
 sudo mariadb < server/schema.sql
 ```
 
-Схема создает базы `users` и `tasks`. При повторном запуске существующие пользователи не удаляются.
+Скрипт создает базу `project_planner_auth` и таблицы `users` и `tasks`. Повторный запуск не удаляет существующих пользователей и задач.
 
-Пользователь приложения должен иметь права на базу `project_planner_auth`.
+### Запуск
 
-### 4. Запуск
-
-Запустить frontend и backend одновременно:
+Запустить frontend и backend одной командой:
 
 ```bash
 npm run dev:full
 ```
 
-Или в двух терминалах:
+Или открыть два терминала и выполнить:
 
 ```bash
 npm run server
@@ -111,34 +121,34 @@ npm run dev
 
 - приложение: http://localhost:5173;
 - API: http://localhost:3001;
-- health check: http://localhost:3001/api/health.
+- проверка API: http://localhost:3001/api/health.
 
 ## API
 
 ### Авторизация
 
 ```text
-POST /api/auth/register
-POST /api/auth/login
-GET  /api/auth/me
-POST /api/auth/logout
+POST /api/auth/register  Регистрация
+POST /api/auth/login     Вход
+GET  /api/auth/me        Текущий пользователь
+POST /api/auth/logout    Выход
 ```
 
 ### Задачи
 
 ```text
-GET    /api/tasks
-POST   /api/tasks
-PATCH  /api/tasks/:id
-DELETE /api/tasks/:id
-DELETE /api/tasks
+GET    /api/tasks        Получить задачи текущего пользователя
+POST   /api/tasks        Создать задачу
+PATCH  /api/tasks/:id    Изменить задачу или ее статус
+DELETE /api/tasks/:id    Удалить задачу
+DELETE /api/tasks        Удалить все задачи пользователя
 ```
 
-Все запросы к задачам требуют активной сессии. Подробные форматы запросов и ответов описаны в технической документации.
+Все маршруты `/api/tasks` требуют активной сессии. Backend дополнительно фильтрует запросы по `user_id`, поэтому пользователь не получает доступ к чужим задачам.
 
 ## Проверка
 
-Production-сборка frontend:
+Собрать production-версию frontend:
 
 ```bash
 npm run build
@@ -150,14 +160,26 @@ npm run build
 2. Создать задачу.
 3. Перетащить карточку в другую колонку.
 4. Изменить название или приоритет.
-5. Перезагрузить страницу и проверить сохранение в MariaDB.
+5. Перезагрузить страницу и убедиться, что задача загрузилась из MariaDB.
 6. Выйти и войти снова.
 
-## Ограничения текущей версии
+## Структура проекта
 
-- Стандартное хранилище `express-session` подходит для разработки; для production нужен внешний session store.
-- Автоматические unit- и integration-тесты пока не настроены.
-- Совместные проекты, роли и приглашение участников пока не реализованы.
+```text
+src/                React-приложение
+src/api/            HTTP-клиент frontend
+src/components/     Auth, Header, Board и модальные окна
+server/server.js    Express API и маршруты
+server/db.js        Пул подключений MariaDB
+server/schema.sql   Схема базы данных
+docs/               Техническая документация
+```
+
+## Ограничения
+
+- стандартное хранилище `express-session` подходит для разработки; для production нужен внешний session store;
+- автоматические unit- и integration-тесты пока не настроены;
+- совместные проекты, роли и приглашение участников пока не реализованы.
 
 ## Лицензия
 
