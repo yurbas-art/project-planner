@@ -15,7 +15,6 @@ Express backend
 	|
 	| mysql2
 	v
-MariaDB
 ```
 
 Frontend не подключается к базе данных напрямую. Все операции с учетными записями и задачами выполняются через backend API.
@@ -28,6 +27,7 @@ Frontend не подключается к базе данных напрямую
 - CSS - стили компонентов и адаптация интерфейса.
 - `react-dnd` и `react-dnd-html5-backend` - Drag & Drop карточек между колонками.
 - Fetch API - HTTP-запросы к backend.
+- Nginx - раздача production-сборки frontend-контейнера.
 
 Основные frontend-модули:
 
@@ -49,6 +49,13 @@ Frontend не подключается к базе данных напрямую
 - `mysql2` - подключение Node.js к MariaDB/MySQL по протоколу SQL.
 
 Основной серверный файл - `server/server.js`. Подключение к базе данных вынесено в `server/db.js`.
+
+## Контейнеризация
+
+- Docker Engine - запуск изолированных сервисов.
+- Docker Compose - оркестрация frontend, API и MariaDB.
+
+Compose включает три сервиса: `frontend`, `api` и `db`. Внутри Docker-сети backend подключается к MariaDB по имени `db` и порту `3306`. С хоста база доступна на порту `3307`, чтобы не конфликтовать с контейнером `DB-labs`.
 
 ## База данных
 
@@ -137,10 +144,19 @@ npm run dev
 
 По умолчанию frontend доступен на `http://localhost:5173`, backend - на `http://localhost:3001`, MariaDB - на `127.0.0.1:3307`.
 
+Docker-запуск:
+
+```bash
+cp .env.docker.example .env.docker
+npm run docker:up
+```
+
+
 ## Ограничения текущей версии
 
 - В разработке используется стандартное хранилище сессий Express; для production нужен внешний session store.
 - Автоматические unit- и integration-тесты пока не настроены.
 - Docker-контейнер `DB-labs` не является частью backend проекта и не изменяется приложением.
 - Настройки с секретами находятся в локальном `server/.env`, который исключен из Git.
+- Для Docker-запуска требуется Compose plugin или совместимая команда `docker-compose`.
 

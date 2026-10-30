@@ -6,9 +6,10 @@
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5-111827?style=flat-square&logo=express&logoColor=white)
 ![MariaDB](https://img.shields.io/badge/MariaDB-3307-003545?style=flat-square&logo=mariadb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?style=flat-square&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)
 
-Project Planner - веб-приложение для управления задачами на Kanban-доске. Пользователь создает карточки, назначает им приоритет, редактирует содержимое и перемещает задачи между четырьмя этапами: **Очередь**, **В работе**, **На проверке** и **Готово**.
+Project Planner - веб-приложение для управления задачами на Kanban-доске. Пользователь создает карточки, назначает приоритет, редактирует задачи и перемещает их между этапами: **Очередь**, **В работе**, **На проверке** и **Готово**.
 
 Учетные записи и задачи хранятся в MariaDB. Frontend обращается к базе только через Express API, а доступ к задачам ограничен текущей пользовательской сессией.
 
@@ -20,7 +21,7 @@ Project Planner - веб-приложение для управления зад
 - Drag & Drop между Kanban-колонками;
 - приоритеты: низкий, средний и высокий;
 - серверное хранение задач с привязкой к пользователю;
-- модальные формы и контекстные действия для карточек.
+- Docker Compose для запуска всего стека;
 
 ## Архитектура
 
@@ -33,7 +34,7 @@ flowchart LR
     API -->|mysql2| DB
 ```
 
-Приложение разделено на три уровня:
+Приложение разделено на четыре уровня:
 
 1. **Frontend** отображает интерфейс и отправляет запросы.
 2. **Backend** управляет сессиями, проверяет пользователя и выполняет операции с задачами.
@@ -49,6 +50,7 @@ flowchart LR
 | Сервер | Node.js, Express 5 |
 | База данных | MariaDB, `mysql2` |
 | Авторизация | `express-session`, `bcryptjs`, HttpOnly cookie |
+| Инфраструктура | Docker Compose, Nginx |
 | Документация | Markdown, Mermaid |
 
 Подробности находятся в [`docs/technical_description.md`](docs/technical_description.md) и [`docs/technological_stack.md`](docs/technological_stack.md).
@@ -58,8 +60,8 @@ flowchart LR
 ### Требования
 
 - Node.js и npm;
-- MariaDB;
-- свободный локальный порт `3307`.
+- Docker Engine и Docker Compose;
+- свободные порты `3001`, `3307` и `5173`.
 
 
 ### Установка
@@ -70,9 +72,37 @@ cd project-planner
 npm install --legacy-peer-deps
 ```
 
-### Настройка окружения
+### Запуск в Docker
 
-Скопируйте `server/.env.example` в `server/.env` и укажите параметры MariaDB:
+Docker Compose запускает frontend, Express API и MariaDB. Этот вариант не использует системную MariaDB и не изменяет контейнер `DB-labs`.
+
+Создайте файл переменных и измените пароли:
+
+```bash
+cp .env.docker.example .env.docker
+```
+
+Затем запустите стек:
+
+```bash
+npm run docker:up
+```
+
+Адреса сервисов:
+
+- приложение: http://localhost:5173;
+- API: http://localhost:3001;
+
+Остановить контейнеры и посмотреть логи:
+
+```bash
+npm run docker:down
+npm run docker:logs
+```
+
+### Настройка окружения без Docker
+
+Для запуска backend напрямую скопируйте `server/.env.example` в `server/.env`:
 
 ```bash
 cp server/.env.example server/.env
@@ -91,7 +121,7 @@ SESSION_SECRET=change-this-secret
 
 `server/.env` содержит секреты и не должен добавляться в Git.
 
-### Подготовка базы данных
+### Подготовка базы данных без Docker
 
 Убедитесь, что MariaDB запущена на `127.0.0.1:3307`, а пользователь приложения имеет права на базу `project_planner_auth`. Затем примените схему:
 
@@ -99,28 +129,16 @@ SESSION_SECRET=change-this-secret
 sudo mariadb < server/schema.sql
 ```
 
-Скрипт создает базу `project_planner_auth` и таблицы `users` и `tasks`. Повторный запуск не удаляет существующих пользователей и задач.
+Скрипт создает базу `project_planner_auth` и таблицы `users` и `tasks`. Повторный запуск не удаляет существующие данные.
 
-### Запуск
-
-Запустить frontend и backend одной командой:
-
-```bash
-npm run dev:full
-```
-
-Или открыть два терминала и выполнить:
+### Запуск без Docker
 
 ```bash
 npm run server
 npm run dev
 ```
 
-После запуска:
-
-- приложение: http://localhost:5173;
-- API: http://localhost:3001;
-- проверка API: http://localhost:3001/api/health.
+В этом режиме MariaDB должна быть запущена отдельно на `127.0.0.1:3307`.
 
 ## API
 
@@ -171,6 +189,8 @@ src/components/     Auth, Header, Board и модальные окна
 server/server.js    Express API и маршруты
 server/db.js        Пул подключений MariaDB
 server/schema.sql   Схема базы данных
+docker-compose.yml  Docker Compose для frontend, API и MariaDB
+docker/             Dockerfiles и Nginx
 docs/               Техническая документация
 ```
 
